@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<title>Invito Equox</title>
+<!--
+  Pagina degli inviti di Equox. Il codice arriva dopo "#" nel link
+  (https://.../#CODICE): la parte dopo "#" NON viene mai inviata al server
+  che ospita la pagina, resta solo nel telefono di chi apre il link.
+  La pagina non apre nulla da sola: l'utente tocca il pulsante.
+-->
+<style>
+  :root { --ground:#EEF1EF; --surface:#FFFFFF; --ink:#17201E; --muted:#56615D; --line:#D8DEDB; --primary:#0E5A66; --soft:#E0ECEC; --danger:#B3261E; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ground:#0F1514; --surface:#18201F; --ink:#E8EEEC; --muted:#A3AFAA; --line:#2C3735; --primary:#2E8A97; --soft:#173A3F; --danger:#F2B8B5; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 460px; margin: 0 auto; padding: 32px 16px 48px; display:flex; flex-direction:column; gap:16px; }
+  h1 { font-size: 40px; margin: 0; letter-spacing: -1px; }
+  .card { background:var(--surface); border-radius:20px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+  .muted { color: var(--muted); font-size: 14px; margin: 0; }
+  .btn { display:block; text-align:center; text-decoration:none; border:0; cursor:pointer; width:100%; min-height:52px; border-radius:999px; font-weight:700; font-size:16px; padding:14px 20px; }
+  .primary { background:var(--primary); color:#fff; }
+  .secondary { background:var(--soft); color:var(--primary); }
+  @media (prefers-color-scheme: dark) { .secondary { color:#7CC3CC; } }
+  code { display:block; word-break:break-all; background:var(--ground); border-radius:12px; padding:12px; font-size:15px; }
+  ol { margin:0; padding-left:20px; }
+  .error { color: var(--danger); font-weight:600; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Equox</h1>
+
+  <section class="card" id="ok" hidden>
+    <strong style="font-size:18px">Sei stato invitato in un gruppo</strong>
+    <p class="muted">Con Equox dividete le spese e sapete sempre chi deve cosa a chi.</p>
+    <a class="btn primary" id="open" href="#">Apri in Equox</a>
+    <p class="muted">Se l'app non si apre, apri Equox, vai su <b>Gruppi</b> &rsaquo; <b>Unisciti con un codice</b> e incolla questo codice:</p>
+    <code id="code"></code>
+    <button class="btn secondary" id="copy" type="button">Copia il codice</button>
+  </section>
+
+  <section class="card" id="bad" hidden>
+    <p class="error">Questo link d'invito non è completo o non è valido.</p>
+    <p class="muted">Chiedi a chi ti ha invitato di mandarti un nuovo invito.</p>
+  </section>
+
+  <section class="card">
+    <strong>Non hai ancora Equox?</strong>
+    <ol class="muted">
+      <li>Equox è in fase di prova: chiedi a chi ti ha invitato come installarlo.</li>
+      <li>Accedi o registrati: Equox ti porterà nel gruppo.</li>
+    </ol>
+    <p class="muted">L'invito vale 7 giorni. Equox non sposta soldi: tiene solo il conto delle spese condivise.</p>
+  </section>
+</main>
+<script>
+  (function () {
+    var code = (location.hash || '').replace(/^#/, '');
+    // Solo caratteri ammessi nei codici di Equox: nessun testo arbitrario
+    // finisce nella pagina o nel link verso l'app.
+    if (!/^[A-Za-z0-9_-]{24,64}$/.test(code)) {
+      document.getElementById('bad').hidden = false;
+      return;
+    }
+    document.getElementById('ok').hidden = false;
+    document.getElementById('code').textContent = code;
+    document.getElementById('open').setAttribute('href', 'equox://invito/' + code);
+    var copy = document.getElementById('copy');
+    copy.addEventListener('click', function () {
+      var done = function () { copy.textContent = 'Codice copiato'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done, function () { selectCode(); });
+      } else {
+        selectCode();
+      }
+    });
+    function selectCode() {
+      var r = document.createRange();
+      r.selectNodeContents(document.getElementById('code'));
+      var s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+      copy.textContent = 'Codice selezionato: copialo';
+    }
+  })();
+</script>
+</body>
+</html>
